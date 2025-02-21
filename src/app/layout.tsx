@@ -6,9 +6,10 @@ import { type Metadata } from "next";
 import {
     ClerkProvider,
     SignInButton,
+    SignUpButton,
     SignedIn,
     SignedOut,
-    UserButton
+    UserButton,
 } from '@clerk/nextjs'
 
 import { TRPCReactProvider } from "@/trpc/react";
