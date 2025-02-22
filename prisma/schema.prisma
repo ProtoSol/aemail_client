@@ -20,9 +20,23 @@ datasource db {
 // }
 
 model User {
-    id           String  @id @default(cuid())
-    emailAddress String  @unique
+    id           String    @id @default(cuid())
+    emailAddress String    @unique
     firstName    String
     lastName     String
     imageUrl     String?
+    accounts     Account[] @relation("UserAccounts")
+}
+
+model Account {
+    id     String @id @default(cuid())
+    userId String
+
+    accessToken  String @unique
+    emailAddress String
+    name         String
+
+    nextDeltaToken String?
+
+    user User @relation(fields: [userId], references: [id], name: "UserAccounts")
 }

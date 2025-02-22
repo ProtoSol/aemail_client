@@ -1,5 +1,6 @@
 "use server"
 
+import axios from "axios";
 import { auth } from "@clerk/nextjs/server";
 
 export const getAurinkoAuthUrl = async (serviceType: 'Google' | 'Office365') => {
@@ -17,4 +18,47 @@ export const getAurinkoAuthUrl = async (serviceType: 'Google' | 'Office365') => 
     })
 
     return `https://api.aurinko.io/v1/auth/authorize?${params.toString()}`;
+}
+
+export const exchangeCodeForAcessToken = async (code: string) => {
+    try {
+        const response = await axios.post(`https://api.aurinko.io/v1/auth/token/${code}`, {}, {
+            auth: {
+                username: process.env.AURINKO_CLIENT_ID as string,
+                password: process.env.AURINKO_CLIENT_SECRET as string,
+            }
+        });
+        return response.data as {
+            accountId: string;
+            accessToken: string;
+            userId: string;
+            userSession: string;
+        }
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            console.error(error.response?.data);
+        }
+        console.error(error);
+    }
+}
+
+export const getAccountDetails = async (accessToken: string) => {
+    try {
+        const response = await axios.get('https://api.aurinko.io/v1/account', {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        });
+        return response.data as {
+            email: string;
+            name: string;
+        };
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            console.error("Error Fetching Account Details", error.response?.data);
+        } else {
+            console.error("Unexpected Error Fetching Account Details", error);
+        }
+        throw error;
+    }
 }
